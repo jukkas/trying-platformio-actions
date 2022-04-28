@@ -43,3 +43,18 @@ jobs:
         path: |
           .pio/build/esp32dev/firmware.bin
           .pio/build/esp32dev/partitions.bin
+
+  release:
+    name: Release
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download the build output
+        uses: actions/download-artifact@v2
+        with:
+          name: my-firmware
+      - name: Upload to my own Webdav server
+        run: -
+          pwd
+          ls -la
+          curl --user '${{secrets.WEBDAV_USER}}:${{secrets.WEBDAV_PASSWORD}}' -T firmware.bin ${{secrets.WEBDAV_URL}}/demo-firmware.bin
