@@ -28,8 +28,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade platformio
     - name: Run PlatformIO
-      env: # Or as an environment variable
-        MY_TEST_SECRET: ${{ secrets.MY_TEST_SECRET }}
+      env:
+        MY_TEST_SECRET: "${{ secrets.MY_TEST_SECRET }}"
         FIRMWARE_VERSION: "v1"
       run: |
         pio run
