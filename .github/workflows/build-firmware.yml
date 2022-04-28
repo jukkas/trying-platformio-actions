@@ -54,7 +54,7 @@ jobs:
         with:
           name: my-firmware
       - name: Upload to my own Webdav server
-        run: -
+        run: |
           pwd
           ls -la
           curl --user '${{secrets.WEBDAV_USER}}:${{secrets.WEBDAV_PASSWORD}}' -T firmware.bin ${{secrets.WEBDAV_URL}}/demo-firmware.bin
