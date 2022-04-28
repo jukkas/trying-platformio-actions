@@ -32,3 +32,9 @@ jobs:
         MY_TEST_SECRET: ${{ secrets.MY_TEST_SECRET }}
       run: |
         pio run
+    - uses: actions/upload-artifact@v3
+      with:
+        name: my-firmware
+        path: |
+          .pio/build/esp32dev/firmware.bin
+          .pio/build/esp32dev/partitions.bin
