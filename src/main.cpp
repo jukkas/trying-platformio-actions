@@ -18,6 +18,10 @@ const char* hostname = "esp32";  // For multicast DNS and OTA
 #define FIRMWARE_VERSION "1"
 #endif
 
+#ifndef MY_TEST_SECRET
+#define MY_TEST_SECRET "Oh no, the secret did not make it!"
+#endif
+
 // WLAN and local webserver
 WiFiClient wifiClient;
 WebServer server(80);
@@ -69,8 +73,8 @@ void handleStaticFile() {
 
 /*** Webserver route handlers ***/
 
-void web_hello() {
-    server.send(200, "application/json", "{\"message\":\"Hello world!\"}");
+void web_secret() {
+    server.send(200, "application/json", "{\"secret\":\"" MY_TEST_SECRET "\"}");
 }
 
 void web_fw_version() {
@@ -107,7 +111,7 @@ void setup() {
 
     /* Webserver routes */
     SPIFFS.begin();
-    server.on("/hello", HTTP_GET, web_hello);
+    server.on("/secret", HTTP_GET, web_secret);
     server.on("/version", HTTP_GET, web_fw_version);
     server.onNotFound(handleStaticFile);
     server.begin();
