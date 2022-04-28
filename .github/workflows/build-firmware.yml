@@ -1,6 +1,9 @@
 name: PlatformIO CI
 
-on: [push]
+on:
+  push:
+    tags:        
+      - v**
 
 jobs:
   build:
@@ -16,6 +19,8 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
+    - uses: olegtarasov/get-tag@v2.1
+      id: tagName          
     - name: Cache PlatformIO
       uses: actions/cache@v2
       with:
@@ -30,7 +35,7 @@ jobs:
     - name: Run PlatformIO
       env:
         MY_TEST_SECRET: "${{ secrets.MY_TEST_SECRET }}"
-        FIRMWARE_VERSION: "v1"
+        FIRMWARE_VERSION: "${{steps.tagName.outputs.tag}}"
       run: |
         echo "The GitHub Action Secret will be masked:  "
         echo ${{ secrets.MY_TEST_SECRET }}
@@ -53,8 +58,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: my-firmware
+      - uses: olegtarasov/get-tag@v2.1
+        id: tagName          
       - name: Upload to my own Webdav server
         run: |
-          pwd
-          ls -la
-          curl --user '${{secrets.WEBDAV_USER}}:${{secrets.WEBDAV_PASSWORD}}' -T firmware.bin ${{secrets.WEBDAV_URL}}/demo-firmware.bin
+          curl --user '${{secrets.WEBDAV_USER}}:${{secrets.WEBDAV_PASSWORD}}' -T firmware.bin ${{secrets.WEBDAV_URL}}/demo-firmware-${{steps.tagName.outputs.tag}}.bin
