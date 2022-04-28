@@ -30,6 +30,7 @@ jobs:
     - name: Run PlatformIO
       env: # Or as an environment variable
         MY_TEST_SECRET: ${{ secrets.MY_TEST_SECRET }}
+        FIRMWARE_VERSION: "v1"
       run: |
         pio run
     - uses: actions/upload-artifact@v3
