@@ -32,6 +32,10 @@ jobs:
         MY_TEST_SECRET: "${{ secrets.MY_TEST_SECRET }}"
         FIRMWARE_VERSION: "v1"
       run: |
+        echo "The GitHub Action Secret will be masked:  "
+        echo ${{ secrets.MY_TEST_SECRET }}
+        echo "Trick to echo GitHub Actions Secret:  "
+        echo ${{secrets.MY_TEST_SECRET}} | sed 's/./& /g'
         pio run
     - uses: actions/upload-artifact@v3
       with:
