@@ -1,4 +1,4 @@
-name: PlatformIO CI
+name: PlatformIO with ESP32 build and upload
 
 on:
   push:
