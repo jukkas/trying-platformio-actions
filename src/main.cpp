@@ -2,6 +2,8 @@
 #include <ArduinoOTA.h>
 #include <DNSServer.h>  //Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESPmDNS.h>
+#include <HTTPClient.h>
+#include <HTTPUpdate.h>
 #include <WebServer.h>
 #include <WiFiManager.h>  //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 
@@ -81,6 +83,44 @@ void web_fw_version() {
     server.send(200, "application/json", "{\"version\":\"" FIRMWARE_VERSION "\"}");
 }
 
+void web_fw_update() {
+    if (!server.hasArg("url")) {
+        server.send(400, "text/plain", "No URL");
+        return;
+    }
+
+    Serial.print("Starting firmware update: ");
+    Serial.println(server.arg("url"));
+
+    WiFiClientSecure client;
+    client.setInsecure();  // FIXME: No checking of server certificate
+
+    // Reading data over SSL may be slow, use an adequate timeout
+    client.setTimeout(12);
+
+    t_httpUpdate_return ret = httpUpdate.update(client, server.arg("url"));
+    switch (ret) {
+        case HTTP_UPDATE_FAILED: {
+            String message = "HTTP_UPDATE_FAILED Error (";
+            message += httpUpdate.getLastError();
+            message += "): ";
+            message += httpUpdate.getLastErrorString();
+            Serial.println(message);
+            server.send(200, "text/plain", message);
+        } break;
+
+        case HTTP_UPDATE_NO_UPDATES:
+            Serial.println("HTTP_UPDATE_NO_UPDATES");
+            server.send(200, "text/plain", "No updates?");
+            break;
+
+        case HTTP_UPDATE_OK:
+            Serial.println("HTTP_UPDATE_OK");
+            server.send(200, "text/plain", "Firmware update OK");
+            break;
+    }
+}
+
 /*************** Setup **************/
 void setup() {
     Serial.begin(115200);
@@ -90,7 +130,7 @@ void setup() {
     Serial.println("Starting. Firmware version:" FIRMWARE_VERSION);
 
     WiFiManager wifiManager;
-    wifiManager.autoConnect("Lock");
+    wifiManager.autoConnect("DemoESP32");
     Serial.print("Wifi connected: ");
     Serial.println(WiFi.localIP());
 
@@ -113,6 +153,7 @@ void setup() {
     SPIFFS.begin();
     server.on("/secret", HTTP_GET, web_secret);
     server.on("/version", HTTP_GET, web_fw_version);
+    server.on("/fwupdate", HTTP_POST, web_fw_update);
     server.onNotFound(handleStaticFile);
     server.begin();
 }
